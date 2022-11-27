@@ -1,9 +1,12 @@
-const CLIENT_ID = "3b1d5406f26c4a509611a031507ab5a8";
-const scopes = "user-top-read user-follow-read playlist-read-private user-library-read";
-const ACCESS_TOKEN_KEY = "accessToken";
-const APP_URL = "http://localhost:3000";
+import {ACCESS_TOKEN, EXPIRES_IN, TOKEN_TYPE} from "../common"
 
-const REDIRECT_URI = "http://localhost:3000/login/login.html"
+
+const CLIENT_ID = import.meta.env.VITE_CLIENT_ID;
+
+const APP_URL = import.meta.env.VITE_APP_URL;
+const scopes = "user-top-read user-follow-read playlist-read-private user-library-read";
+
+const REDIRECT_URI = import.meta.env.VITE_REDIRECT_URI;
 //authorization id to to access scopes and redirect url
 //go to the login window
 const authorizeUser = () => {
@@ -14,9 +17,9 @@ const authorizeUser = () => {
 
 // saving information associated with the app inside local storage
 window.setItmesInLocalStorage = ({accessToken, tokenType, expiresIn}) => {
-    localStorage.setItem("accessToken", accessToken);
-    localStorage.setItem("tokenType", tokenType);
-    localStorage.setItem("expiresIn", expiresIn);
+    localStorage.setItem(ACCESS_TOKEN, accessToken);
+    localStorage.setItem(TOKEN_TYPE, tokenType);
+    localStorage.setItem(EXPIRES_IN, expiresIn);
     window.location.href = APP_URL;
 }
  
@@ -24,7 +27,7 @@ window.setItmesInLocalStorage = ({accessToken, tokenType, expiresIn}) => {
 //looks for access token
 // if true go to dashboard
 window.addEventListener("load", () => {
-    const accessToken = localStorage.getItem(ACCESS_TOKEN_KEY)
+    const accessToken = localStorage.getItem(ACCESS_TOKEN)
     if(accessToken) {
         window.location.href = `${APP_URL}/dashboard/dashboard.html`
     }
