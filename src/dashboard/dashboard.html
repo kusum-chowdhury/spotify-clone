@@ -8,11 +8,11 @@
     <link rel="stylesheet" href="../style.css">
     <script type="module" src="dashboard.js"></script>
 </head>
-<body class="bg-dark text-primary h-screen">
+<body class="bg-black text-primary h-screen">
     <main class="h-full grid-template-areas grid grid-cols-[250px_1fr] grid-rows-[1fr_auto]">
  <aside class="sidenav">sidenav</aside>
- <section class="content">
-     <header class="border-2 border-solid px-8 py-4">
+ <article class="content bg-black-base">
+     <header class="border-2 border-solid px-8 py-4 bg-transparent">
          <nav class="flex justify-end relative">
             <button id="user-profile-btn" class="flex items-center gap-x-2 rounded-2xl p-1 px-2 hover:bg-light-black">
                 <section>
@@ -42,22 +42,11 @@
             </ul>
          </nav>
      </header>
-     <article class="p-4">
-        <h1 class="text-2xl">Featured</h1>
-        <section id="featured-playlist-items" class="featured-songs grid grid-cols-auto-fill-cards gap-4" >
-            <!-- <section class="rounded p-4 border-solid border-2">
-                <img src="#" alt="">
-                <h2 class="text-sm">Name</h2>
-                <h3 class="text-xs">Description</h3>
-            </section>
-            <section>
-                <img src="" alt="">
-                <h2>Name</h2>
-                <h3>Description</h3>
-            </section> -->
-        </section>
-     </article>
- </section>
+     <section id="page-content">
+
+     </section>
+    
+ </article>
    </main>
    <footer class="now-playing">now playing</footer>
 </body>

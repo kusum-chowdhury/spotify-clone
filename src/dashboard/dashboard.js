@@ -40,16 +40,17 @@ const onPlaylistItemClicked = (event) => {
 console.log(event.target);
 }
 
-const loadFeaturedPlaylist = async() => {
+//takes arguememnts
+const loadPlaylist = async(endpoint, elementId) => {
   // get items from playlist 
-  const {playlists: {items}} = await fetchRequest(ENPOINT.featuredPlaylist);
-  const playlistItemsSection = document.querySelector("#featured-playlist-items");
+  const {playlists: {items}} = await fetchRequest(endpoint);
+  const playlistItemsSection = document.querySelector(`#${elementId}`);
 
   // get destructure name image id 
   for(let {name, description, images, id} of items){
     // create playlistItem section and add classes and id
     const playlistItem = document.createElement("section");
-    playlistItem.classList = "rounded p-4 border-solid border-2 hover:cursor-pointer";
+    playlistItem.className = "bg-black-secondary rounded p-4 hover:cursor-pointer hover:bg-light-black";
     playlistItem.id = id;
     playlistItem.setAttribute("data-type", "playlist");
     // onclick run onPlaylistItemClicked 
@@ -58,19 +59,42 @@ const loadFeaturedPlaylist = async() => {
     const [{url: imageUrl}] = images;
     // add img, name, description in playlistItem section innerHTML
      playlistItem.innerHTML = `<img src="${imageUrl}" alt="${name}" class="rounded mb-2 object-contain shadow" />
-    <h2 class="text-sm">${name}</h2>
-    <h3 class="text-xs">${description}</h3>`;
+    <h2 class="text-base font-semibold mb-4 truncate">${name}</h2>
+    <h3 class="text-sm text-secondary line-clamp-2">${description}</h3>`;
     // append playlistItem in playlistItemsSection section 
     playlistItemsSection.appendChild(playlistItem);
   }
 
 
 }
+// select article for playlist section 
+// create map with type and id 
+// add article with playlist in pageContent 
+const fillContentForDashboard = () => {
+  const pageContent = document.querySelector("#page-content")
+  const playlistMap = new Map([["featured", "featured-playlist-items"], ["top playlists", "top-playlist-items"]])
+ let innerHTML = "";
+ for(let [type, id] of playlistMap){
+  innerHTML += `<article class="p-4">
+  <h1 class="text-2xl mb-4 font-bold capitalize">${type}</h1>
+  <section id="${id}" class="featured-songs grid grid-cols-auto-fill-cards gap-4" >
+    
+  </section>
+</article>`
+ }
+ pageContent.innerHTML = innerHTML;
+}
 
+// run loadPlaylist and provide arguements 
+const loadPlaylists = () => {
+   loadPlaylist(ENPOINT.featuredPlaylist, "featured-playlist-items");
+   loadPlaylist(ENPOINT.toplists, "top-playlist-items");
+}
 
 document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
-    loadFeaturedPlaylist();
+    fillContentForDashboard();
+    loadPlaylists();
     // on clicking upon anywhere on the page, hide logout option 
    document.addEventListener("click", () => {
     const profileMenu = document.querySelector("#profile-menu");

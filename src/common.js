@@ -5,7 +5,8 @@ const APP_URL = import.meta.env.VITE_APP_URL;
 
 export const ENPOINT = {
     userInfo: "me",
-    featuredPlaylist: "browse/featured-playlists?limit=5"
+    featuredPlaylist: "browse/featured-playlists?limit=5",
+    toplists: "browse/categories/toplists/playlists?limit=10"
 }
 
 // removes ACCESS_TOKEN TOKEN_TYPE EXPIRES_IN from lc 
