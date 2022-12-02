@@ -1,5 +1,5 @@
 import { fetchRequest } from "../api";
-import { ENPOINT, logout } from "../common";
+import { ENPOINT, logout, SECTIONTYPE } from "../common";
 
 // toggles the hidden logout option upon clicking on profile button 
 const onProfileClick = (event) => {
@@ -36,8 +36,13 @@ const onProfileClick = (event) => {
 
 }
 
-const onPlaylistItemClicked = (event) => {
+// run upon clicking on the playlist item 
+// invoke loadSection funciton 
+const onPlaylistItemClicked = (event, id) => {
 console.log(event.target);
+const section = {type: SECTIONTYPE.PLAYLIST, playlist: id}
+history.pushState(section,"",`playlist/${id}`);
+loadSection(section);
 }
 
 //takes arguememnts
@@ -50,11 +55,11 @@ const loadPlaylist = async(endpoint, elementId) => {
   for(let {name, description, images, id} of items){
     // create playlistItem section and add classes and id
     const playlistItem = document.createElement("section");
-    playlistItem.className = "bg-black-secondary rounded p-4 hover:cursor-pointer hover:bg-light-black";
+    playlistItem.className =  "bg-black-secondary rounded p-4 hover:cursor-pointer hover:bg-light-black";
     playlistItem.id = id;
     playlistItem.setAttribute("data-type", "playlist");
     // onclick run onPlaylistItemClicked 
-    playlistItem.addEventListener("click", onPlaylistItemClicked);
+    playlistItem.addEventListener("click", (event) => onPlaylistItemClicked(event, id));
     // get image from url 
     const [{url: imageUrl}] = images;
     // add img, name, description in playlistItem section innerHTML
@@ -91,8 +96,85 @@ const loadPlaylists = () => {
    loadPlaylist(ENPOINT.toplists, "top-playlist-items");
 }
 
+const formatTime = (duration) => {
+  const min = Math.floor(duration/60_000);
+  const sec = ((duration % 6_000) / 1000).toFixed(0);
+  const formattedTime = sec == 60?
+  min + 1 + ":00": min + ":" + (sec < 10? "0":"")+ sec;
+  return formattedTime;
+}
+
+const loadPlaylistTracks = ({tracks})=> {
+  const trackSection = document.querySelector("#tracks");
+let trackNo = 1;
+  for(let trackItem of tracks.items) {
+    let {id, artists, name, album, duration_ms: duration} = trackItem.track;
+    let track = document.createElement("section");
+    track.id = id;
+    track.className = "track p-1 grid grid-cols-[50px_1fr_1fr_50px] items-center justify-items-start gap-4 rounded-md hover:bg-light-black";
+    let image = album.images.find(img => img.height === 64);
+    track.innerHTML = ` 
+   <p class="justify-self-center">${trackNo++}</p>
+   <section class="grid grid-flow-cols-[auto_1fr] place-items-center">
+   <img class="h8 w-8" src="${image.url}" alt="${name}" />
+   <article class="flex flex-col">
+   <h2 class="text-xl text-primary">${name}</h2>
+   <p class="text-sm">${Array.from(artists, artist => artist.name).join(", ")}</p>
+   </article>
+   </section>
+   <p>${album.name}</p>
+   <p>${formatTime(duration)}</p>
+`;
+trackSection.appendChild(track);
+  }
+
+}
+
+ const fillContentForPlaylist = async (playlistId) => {
+   const playlist = await fetchRequest(`${ENPOINT.playlist}/${playlistId}`)
+   const pageContent = document.querySelector("#page-content");
+   pageContent.innerHTML = `
+   <header id="playlist-header" class="mx-8 py-4 border-secondary border-b-[0.5px] z-10">
+           <nav class="py-2">
+             <ul class="grid grid-cols-[50px_1fr_1fr_50px] gap-4 text-secondary">
+               <li class="justify-self-center">#</li>
+               <li>Title</li>
+               <li>Album</li>
+               <li>🕚</li>
+             </ul>
+           </nav>
+   </header>
+   <section class="px-8 text-secondary mt-4" id="tracks">
+   </section>
+   `
+
+loadPlaylistTracks(playlist)
+
+
+
+  }
+
+  let onContentScroll;
+
+// if its on DASHBOARD shows the playlists 
+// else load page content 
+const loadSection = (section) => {
+  if(section.type === SECTIONTYPE.DASHBOARD){
+    fillContentForDashboard();
+    loadPlaylist();
+  } else if(section.type === SECTIONTYPE.PLAYLIST){
+   fillContentForPlaylist(section.playlist);
+  }
+  document.querySelector(".content").removeEventListener("scroll", onContentScroll)
+  document.querySelector(".content").addEventListener("scroll", onContentScroll)
+}
+
+
 document.addEventListener("DOMContentLoaded", () => {
     loadUserProfile();
+    const section = {type: SECTIONTYPE.DASHBOARD};
+    history.pushState(section,"","");
+    loadSection(section)
     fillContentForDashboard();
     loadPlaylists();
     // on clicking upon anywhere on the page, hide logout option 
@@ -103,6 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
    })
+
+
  
    //on scroll makes header sticky
    document.querySelector(".content").addEventListener("scroll", (event) => {
@@ -115,5 +199,17 @@ document.addEventListener("DOMContentLoaded", () => {
       header.classList.remove("sticky", "top-0", "bg-black-secondary");
       header.classList.add("bg-transparent")
     }
+    if(history.state.type === SECTIONTYPE.PLAYLIST){
+
+      const playlistHeader = document.querySelector("#playlist-header");
+      if(scrollTop >= playlistHeader.offsetHeight){
+        playlistHeader.classList.add("sticky", "top-[${header.offsetHeight}px]")
+      }
+    }
+   })
+   
+  //  upon clicking on backbutton, takes back to the DASHBOARD with playlists 
+   window.addEventListener("popstate",(event) => {
+    loadSection(event.state);
    })
 })
